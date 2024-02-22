@@ -8,11 +8,11 @@ function bpm() {
         mkdir $PWD/$1/core
         mkdir $PWD/$1/modules
         mkdir $PWD/$1/.src
-        this_file_path=${BASH_SOURCE%/*}
-        main_dir=${this_file_path%/*}
+        main_dir=${BASH_SOURCE%/*}
         cp $main_dir/files/main_package.sh $PWD/$1/main.sh
         cp $main_dir/files/includes_package.sh $PWD/$1/.src/includes.sh
         cp $main_dir/files/config.yml $PWD/$1/config.yml
+        echo "The package \"$1\" has been created."
     }
 
     function BPM_create_module_core() {
@@ -20,31 +20,35 @@ function bpm() {
         mkdir $PWD/modules/$1/utils
         mkdir $PWD/modules/$1/core
         mkdir $PWD/modules/$1/.src
-        this_file_path=${BASH_SOURCE%/*}
-        main_dir=${this_file_path%/*}
+        main_dir=${BASH_SOURCE%/*}
         cp $main_dir/files/main_module.sh $PWD/modules/$1/main.sh
         cp $main_dir/files/includes_module.sh $PWD/modules/$1/.src/includes.sh
     }
 
     function BPM_create_module(){
-        if [[ -f "$PWD/.config.yml" ]]; then
-            if [[ -f "$PWD/.main.sh" ]]; then
+        if [[ -f "$PWD/config.yml" ]]; then
+            if [[ -f "$PWD/main.sh" ]]; then
                 if [[ -d "$PWD/modules" ]]; then
                     BPM_create_module_core $1
+                    echo "The module \"$1\" has been created."
                 else
                     mkdir $PWD/moodules
-                    BPM_create_module_core
+                    BPM_create_module_core $1
+                    echo "The module \"$1\" has been created."
                 fi
             else
                 echo "error: file \"main.sh\" not found."
                 echo "> Are you in the root directory of a bpm package?"
             fi
+        else
             echo "error: file \".config.yml\" not found."
             echo "> Are you in the root directory of a bpm package?"
         fi
     }
 
-    if [[ "$1" == "new" ]] || [[ "$1" == "-n" ]] || [[ "$1" == "--new" ]]; then
+    if [[ -z "$1" ]]; then
+        echo "usage: bpm new package/module name"
+    elif [[ "$1" == "new" ]] || [[ "$1" == "-n" ]] || [[ "$1" == "--new" ]]; then
         if [[ -z "$2" ]]; then
             echo "interactive"
         elif [[ "$2" == "package" ]] || [[ "$2" == "-p" ]] || [[ "$2" == "--package" ]]; then
@@ -62,5 +66,7 @@ function bpm() {
         else
             echo "error: option not defined for bpm()."
         fi
+    else
+        echo "error: option not defined for bpm()."
     fi
 }
