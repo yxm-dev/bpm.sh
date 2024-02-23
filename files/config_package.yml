@@ -3,8 +3,8 @@ metadata:
   author:
   description:
 info:
+  load:
   version:
-  command:
   license:
 modules: all
 
