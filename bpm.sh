@@ -49,11 +49,12 @@ function bpm() {
     }
 
     function BPM_install_core(){
-        load=$(yq '.info.load' $PWD/config.yml | sed 's/\"//g')
-        version=$(yq '.info.version' $PWD/config.yml | sed 's/\"//g')
+        load=$(yq '.info.load' $PWD/config.yml)
+        version=$(yq '.info.version' $PWD/config.yml)
         echo "load: $load" >> ${BASH_SOURCE%/*}/src/packages.yml
-        echo "  version: $version" >> ${BASH_SOURCE%/*}/src/packages.yml
-        echo "  path: $PWD/main.sh" >> ${BASH_SOURCE%/*}/src/packages.yml
+        echo "version: $version" >> ${BASH_SOURCE%/*}/src/packages.yml
+        echo "path: $PWD/main.sh" >> ${BASH_SOURCE%/*}/src/packages.yml
+        echo "---" >> ${BASH_SOURCE%/*}/src/packages.yml
     }
     
     function BPM_install(){
@@ -78,13 +79,32 @@ function bpm() {
     }
 
     function BPM_load(){
-        statement
+        array_of_sizes=($(yq eval 'length' ${BASH_SOURCE%/*}/src/packages.yml))
+        number_of_blocks=${#array_of_sizes[@]}
+        for (( i=0; i<$number_of_blocks; i++ )); do
+            load=$(yq eval "select(documentIndex == $i).load" ${BASH_SOURCE%/*}/src/packages.yml)
+            if [[ "$load" == "$1" ]]; then
+                path=$(yq eval "select(documentIndex == $i).path" ${BASH_SOURCE%/*}/src/packages.yml)
+                source $path
+                echo "The bpm package \"$1\" has been sourced."
+                has_load="yes"
+                break
+            else
+                has_load="no"
+                continue
+            fi
+        done
+        if [[ "$has_load" == "no" ]]; then
+            echo "error: there is no installed bpm package corresponding to \"$1\"."
+        fi
     }
     
-    
-
-    if [[ -z "$1" ]]; then
-        echo "usage: bpm new package/module name"
+    if [[ -z "$1" ]] || 
+       [[ "$1" == "help" ]] || [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+        echo "usage:"
+        echo "> bpm new package/module name"
+        echo "> bpm install [--global]"
+        echo "> bpm load name"
     elif [[ "$1" == "new" ]] || [[ "$1" == "-n" ]] || [[ "$1" == "--new" ]]; then
         if [[ -z "$2" ]]; then
             echo "interactive"
@@ -110,6 +130,12 @@ function bpm() {
             BPM_install global
         else
             echo "error: option not defined for bpm()."
+        fi
+    elif [[ "$1" == "load" ]] || [[ "$1" == "-l" ]] || [[ "$1" == "--load" ]]; then
+        if [[ -n "$2" ]]; then
+            BPM_load "$2"
+        else
+            echo "interactive..."
         fi
     else
         echo "error: option not defined for bpm()."
