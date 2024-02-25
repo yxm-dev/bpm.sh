@@ -62,7 +62,7 @@ function bpm() {
             if [[ -f "$PWD/config.yml" ]]; then
                 if [[ -f "$PWD/main.sh" ]]; then
                     BPM_install_core
-                    name=$(yq '.about.name' $PWD/config.yml)
+                    name=$(yq '.metadata.name' $PWD/config.yml)
                     echo "The package \"$name\" has been installed"
                 else
                     echo "error: file \"main.sh\" not found."
@@ -75,7 +75,7 @@ function bpm() {
         elif [[ "$1" == "global" ]]; then
             BPM_install_core
             echo "source $PWD/main.sh" >> ${BASH_SOURCE%/*}/src/global-packages
-            name=$(yq '.about.name' $PWD/config.yml)
+            name=$(yq '.metadata.name' $PWD/config.yml)
             echo "The package \"$name\" has been installed globally."
         else
             echo "error: Option not defined for bpm()."
