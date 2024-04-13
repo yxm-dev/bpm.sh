@@ -1,0 +1,2 @@
+NAME_UTILS=${BASH_SOURCE%*/}/utils
+NAME_DATA=${BASH_SOURCE%*/}/data

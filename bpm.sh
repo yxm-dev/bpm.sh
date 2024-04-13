@@ -3,39 +3,39 @@
 function bpm() {
     source ${BASH_SOURCE%/*}/src/global-packages
 
-    function BPM_create_package() {
-        mkdir $PWD/$1
-        mkdir $PWD/$1/utils
-        mkdir $PWD/$1/core
-        mkdir $PWD/$1/modules
-        mkdir $PWD/$1/.src
+    function BPM_create() {
+        if [[ "$1" == "package" ]]; then
+            core="$2"
+        elif [[ "$1" == "module" ]]; then
+            core="modules/$2"
+        else
+            echo "error: option \"$2\" not defined"
+        fi
+        mkdir $PWD/$core
+        mkdir $PWD/$core/utils
+        mkdir $PWD/$core/core
+        mkdir $PWD/$core/modules
+        mkdir $PWD/$core/data
+        mkdir $PWD/$core/.src
         main_dir=${BASH_SOURCE%/*}
-        cp $main_dir/files/main_package.sh $PWD/$1/main.sh
-        cp $main_dir/files/includes_package.sh $PWD/$1/.src/includes.sh
-        cp $main_dir/files/config_package.yml $PWD/$1/config.yml
-        echo "The package \"$1\" has been created."
-    }
-
-    function BPM_create_module_core() {
-        mkdir $PWD/modules/$1
-        mkdir $PWD/modules/$1/utils
-        mkdir $PWD/modules/$1/core
-        mkdir $PWD/modules/$1/.src
-        main_dir=${BASH_SOURCE%/*}
-        cp $main_dir/files/main_module.sh $PWD/modules/$1/main.sh
-        cp $main_dir/files/includes_module.sh $PWD/modules/$1/.src/includes.sh
-        cp $main_dir/files/config_module.yml $PWD/modules/$1/.src/config.yml
-    }   
+        cp $main_dir/files/$2/main.sh $PWD/$core/main.sh
+        cp $main_dir/files/$2/includes.sh $PWD/$core/.src/includes.sh
+        cp $main_dir/files/$2/config.yml $PWD/$core/config.yml
+        cp $main_dir/files/env $PWD/$core/.env
+        uppercase=${2^^}
+        sed -i "s/NAME/$uppercase/g" $PWD/$core/.env
+        echo "The $1 \"$2\" has been created."
+    } 
 
     function BPM_create_module(){
         if [[ -f "$PWD/config.yml" ]]; then
             if [[ -f "$PWD/main.sh" ]]; then
                 if [[ -d "$PWD/modules" ]]; then
-                    BPM_create_module_core $1
+                    BPM_create module $1
                     echo "The module \"$1\" has been created."
                 else
                     mkdir $PWD/moodules
-                    BPM_create_module_core $1
+                    BPM_create module $1
                     echo "The module \"$1\" has been created."
                 fi
             else
@@ -114,7 +114,7 @@ function bpm() {
             echo "interactive"
         elif [[ "$2" == "package" ]] || [[ "$2" == "-p" ]] || [[ "$2" == "--package" ]]; then
             if [[ -n "$3" ]]; then
-                BPM_create_package "$3"
+                BPM_create package "$3"
             else 
                 echo "interactive ..."
             fi
